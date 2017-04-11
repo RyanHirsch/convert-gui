@@ -24,6 +24,7 @@
     "eslint-config-hirsch": "^1.0.0",
     "eslint-loader": "^1.7.1",
     "eslint-plugin-babel": "^4.1.1",
+    "eslint-plugin-react": "^6.10.3",
     "expect": "^1.20.2",
     "mocha": "^3.1.2"
   },
