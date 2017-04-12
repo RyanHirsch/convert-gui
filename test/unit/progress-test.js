@@ -1,5 +1,5 @@
 import expect from 'expect';
-import { getTime, getSeconds } from '../../src/utils/progress';
+import { getTime, getMilliseconds } from '../../src/utils/progress';
 const timings = [
   'size=     533kB time=00:00:34.09 bitrate= 128.2kbits/s speed=68.2',
   'size=    1054kB time=00:01:07.39 bitrate= 128.1kbits/s speed=67.4',
@@ -24,12 +24,12 @@ describe('progress', () => {
     const result = getTime(timings[0]);
     expect(result).toEqual('00:00:34.09');
   });
-  it('gets total seconds', () => {
-    const result = getSeconds('00:00:01.00');
+  it('computes ms from seconds', () => {
+    const result = getMilliseconds('00:00:01.00');
     expect(result).toEqual(1000);
   });
-  it('gets total seconds', () => {
-    const result = getSeconds('00:00:00.10');
+  it('computes ms from partial seconds', () => {
+    const result = getMilliseconds('00:00:00.10');
     expect(result).toEqual(100);
   });
 });
