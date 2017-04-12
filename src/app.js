@@ -1,5 +1,8 @@
 import { app, BrowserWindow } from 'electron';
 import shell from 'shelljs';
+import { spawn } from 'child_process';
+
+const cmd = 'ffmpeg -i ~/Downloads/foo.mp4 ~/Downloads/foobar.mp3';
 
 let mainWindow = null;
 
@@ -34,5 +37,33 @@ function ensure(bin = 'ffmpeg') {
     return `This requires ${bin}`;
   }
 }
+// shell.exec(cmd, { async: true, silent: true }, function(code, stdout, stderr) {
+//   console.log('exit', code); // eslint-disable-line no-console
+//   console.log('out', stdout); // eslint-disable-line no-console
+//   console.log('err', stderr); // eslint-disable-line no-console
+// });
+
+const ffmpeg = spawn('ffmpeg', ['-i', '/Users/ryanhirsch/Downloads/foo.mp4', '/Users/ryanhirsch/Downloads/foobar.mp3']);
+ffmpeg
+  .on('error', function (err) {
+    console.log('err', err); // eslint-disable-line no-console
+  })
+  .on('exit', function (code) {
+    console.log('exit', code); // eslint-disable-line no-console
+  })
+  .on('message', function (data) {
+    console.log('message', data); // eslint-disable-line no-console
   });
+ffmpeg.stdout.on('data', function (data) {
+  console.log('o data', data); // eslint-disable-line no-console
+});
+ffmpeg.stdout.on('end', function (data) {
+  console.log('o end', data); // eslint-disable-line no-console
+});
+
+ffmpeg.stderr.on('data', function (data) {
+  console.log('e data', data.toString()); // eslint-disable-line no-console
+});
+ffmpeg.stderr.on('end', function (data) {
+  console.log('e end', data); // eslint-disable-line no-console
 });
