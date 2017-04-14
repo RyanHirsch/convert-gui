@@ -25,6 +25,7 @@ app.on('ready', () => {
       id: Date.now(),
       hasFfmeg: ensure('ffmpeg'),
     });
+    convert(mainWindow.webContents, 'progress');
   });
 
   mainWindow.on('closed', () => {
@@ -39,29 +40,31 @@ function ensure(bin = 'ffmpeg') {
   }
 }
 
-shell.exec('ffprobe ~/Downloads/foo.mp4', { silent: true }, (code, out, err) => {
-  const [, length ] = (/Duration: (\S+),\s/.exec(err));
-  const total = getMilliseconds(length);
+function convert(webContents, topic) {
+  shell.exec('ffprobe ~/Downloads/foo.mp4', { silent: true }, (code, out, err) => {
+    const [, length ] = (/Duration: (\S+),\s/.exec(err));
+    const total = getMilliseconds(length);
 
-  const ffmpeg = spawn('ffmpeg', ['-i', '/Users/ryanhirsch/Downloads/foo.mp4', '/Users/ryanhirsch/Downloads/foobar.mp3']);
-  ffmpeg
-    .on('error', function (err) {
-      console.log('err', err); // eslint-disable-line no-console
-    })
-    .on('exit', function (code) {
-      console.log('exit', code); // eslint-disable-line no-console
+    const ffmpeg = spawn('ffmpeg', ['-i', '/Users/ryanhirsch/Downloads/foo.mp4', '/Users/ryanhirsch/Downloads/foobar.mp3']);
+    ffmpeg
+      .on('error', function (err) {
+        console.log('err', err); // eslint-disable-line no-console
+      })
+      .on('exit', function (code) {
+        console.log('exit', code); // eslint-disable-line no-console
+      });
+
+    ffmpeg.stdout.on('end', function (data) {
+      webContents.send(topic, { percent: 1 });
     });
 
-  ffmpeg.stdout.on('end', function (data) {
-    logPercent(1);
+    ffmpeg.stderr.on('data', function (data) {
+      const progressMarker = getTime(data.toString());
+      const current = getMilliseconds(progressMarker);
+      webContents.send(topic, { percent: current / total });
+    });
   });
-
-  ffmpeg.stderr.on('data', function (data) {
-    const progressMarker = getTime(data.toString());
-    const current = getMilliseconds(progressMarker);
-    logPercent(current / total);
-  });
-});
+}
 
 function logPercent(num) {
   const percent = num * 100;

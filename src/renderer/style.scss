@@ -1,0 +1,29 @@
+@mixin percent {
+  margin: 0.15rem;
+  padding: 0.3rem;
+  text-align: center;
+  color: white;
+  font-weight: bold;
+}
+
+.progress__running {
+  @include percent;
+  background-color: blue;
+}
+
+.progress__done {
+  @include percent;
+  background-color: green;
+}
+
+.progress__none {
+  @include percent;
+  background-color: lightgrey;
+  color: black;
+}
+
+.progress {
+  border: 1px solid blue;
+  margin: 0.5rem 0;
+}
+
