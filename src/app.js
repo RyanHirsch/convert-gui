@@ -65,8 +65,3 @@ function convert(webContents, topic) {
     });
   });
 }
-
-function logPercent(num) {
-  const percent = num * 100;
-  console.log(`${percent.toFixed(2)}%`); // eslint-disable-line no-console
-}
