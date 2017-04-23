@@ -1,10 +1,9 @@
 import { app, BrowserWindow } from 'electron';
-import { getMilliseconds, getTime } from './utils/progress';
+import { createPreviews } from './utils/ffmpeg';
+import logger from './utils/logger';
 import shell from 'shelljs';
-import { spawn } from 'child_process';
 
-const cmd = 'ffmpeg -i ~/Downloads/foo.mp4 ~/Downloads/foobar.mp3';
-
+const tmpDir = app.getPath('temp');
 let mainWindow = null;
 
 app.on('window-all-closed', () => {
@@ -18,14 +17,24 @@ app.on('ready', () => {
     show: false,
   });
   mainWindow.loadURL(`file://${__dirname}/renderer/index.html`);
+  createPreviews('~/Downloads/foo.mp4', tmpDir)
+    .then(({ videoFile, files }) => {
+      mainWindow.webContents.send('store_msg', {
+        type: 'PREVIEW_COMPLETE',
+        videoFile,
+        files,
+      });
+    })
+    .catch(e => logger('failed to create previews', e));
+
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
     mainWindow.webContents.send('addHeaderMessage', {
-      id: Date.now(),
       hasFfmeg: ensure('ffmpeg'),
+      hasFfprobe: ensure('ffprobe'),
     });
-    convert(mainWindow.webContents, 'progress');
+    // convert(mainWindow.webContents, 'progress');
   });
 
   mainWindow.on('closed', () => {
@@ -38,30 +47,4 @@ function ensure(bin = 'ffmpeg') {
   if(!shell.which(bin)) {
     return `This requires ${bin}`;
   }
-}
-
-function convert(webContents, topic) {
-  shell.exec('ffprobe ~/Downloads/foo.mp4', { silent: true }, (code, out, err) => {
-    const [, length ] = (/Duration: (\S+),\s/.exec(err));
-    const total = getMilliseconds(length);
-
-    const ffmpeg = spawn('ffmpeg', ['-i', '/Users/ryanhirsch/Downloads/foo.mp4', '/Users/ryanhirsch/Downloads/foobar.mp3']);
-    ffmpeg
-      .on('error', function (err) {
-        console.log('err', err); // eslint-disable-line no-console
-      })
-      .on('exit', function (code) {
-        console.log('exit', code); // eslint-disable-line no-console
-      });
-
-    ffmpeg.stdout.on('end', function (data) {
-      webContents.send(topic, { percent: 1 });
-    });
-
-    ffmpeg.stderr.on('data', function (data) {
-      const progressMarker = getTime(data.toString());
-      const current = getMilliseconds(progressMarker);
-      webContents.send(topic, { percent: current / total });
-    });
-  });
 }

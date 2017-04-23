@@ -9,12 +9,13 @@
     "compile": "babel src -d dist",
     "dev": "babel-watch src/index.js",
     "lint": "eslint src",
-    "test": "mocha --compilers js:babel-core/register ./test/**"
+    "test": "mocha --compilers js:babel-core/register ./test/**",
+    "learning": "mocha --compilers js:babel-core/register ./test/learning/**"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-core": "^6.24.1",
-    "babel-eslint": "^7.2.1",
+    "babel-eslint": "^7.2.3",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-3": "^6.24.1",
@@ -30,8 +31,13 @@
   },
   "dependencies": {
     "prop-types": "^15.5.8",
-    "react": "^15.5.3",
-    "react-dom": "^15.5.3",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
+    "react-redux": "^5.0.4",
+    "react-router": "^4.1.1",
+    "react-router-dom": "^4.1.1",
+    "react-router-redux": "^5.0.0-alpha.6",
+    "redux": "^3.6.0",
     "shelljs": "^0.7.7"
   }
 }
