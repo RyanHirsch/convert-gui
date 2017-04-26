@@ -4,6 +4,7 @@ import logger from './utils/logger';
 import shell from 'shelljs';
 
 const tmpDir = app.getPath('temp');
+const appDir = app.getPath('appData');
 let mainWindow = null;
 
 app.on('window-all-closed', () => {
@@ -17,7 +18,7 @@ app.on('ready', () => {
     show: false,
   });
   mainWindow.loadURL(`file://${__dirname}/renderer/index.html`);
-  createPreviews('~/Downloads/foo.mp4', tmpDir)
+  createPreviews('/Users/ryanhirsch/Downloads/foo.mp4', appDir)
     .then(({ videoFile, files }) => {
       mainWindow.webContents.send('store_msg', {
         type: 'PREVIEW_COMPLETE',

@@ -1,27 +1,37 @@
-import createHash from 'sha.js';
-import { spawn } from 'child_process';
 import shell from 'shelljs';
-import { getMilliseconds, getTime } from './progress';
 import path from 'path';
+import { spawn } from 'child_process';
+import { getMilliseconds, getTime } from './progress';
+import { hashFile } from './file';
 
-const sha256 = createHash('sha256');
-
-function createPreviews(videoFile, dir) {
-  const hashPath = sha256.update(`${videoFile}-${Date.now()}`, 'utf8').digest('hex');
-  const outputPath = path.join(path.resolve(dir), hashPath);
-  shell.mkdir('-p', outputPath);
-  return new Promise((resolve, reject) => {
-    shell.exec(`ffmpeg -i ${videoFile} -vf fps=1/120 ${outputPath}/frame-%03d.jpg`, { silent: true }, (code, out, err) => {
-      if(code !== 0) {
-        return reject({ videoFile, dir, err });
+function createPreviews(videoFile, outputPath, totalFrames = 20) {
+  return Promise.all([ getDuration(videoFile), hashFile(videoFile) ])
+    .then(([ duration, hash ]) => {
+      const previewFolder = path.join(outputPath, 'previews', hash);
+      if(shell.test('-d', previewFolder)) {
+        return {
+          videoFile,
+          previewFolder,
+          duration,
+          files: shell.ls(previewFolder).map(x => path.join(previewFolder, x)),
+        };
       }
-      return resolve({
-        videoFile,
-        outputPath,
-        files: shell.ls(outputPath).map(x => path.join(outputPath, x)),
+      shell.mkdir('-p', previewFolder);
+      return new Promise((resolve, reject) => {
+        const fps = Math.floor(duration / 1000 / totalFrames);
+        shell.exec(`ffmpeg -i "${videoFile}" -vf fps=1/${fps} "${previewFolder}/frame-%03d.jpg"`, { silent: true }, (code, out, err) => {
+          if(code !== 0) {
+            return reject({ videoFile, previewFolder, err });
+          }
+          return resolve({
+            videoFile,
+            previewFolder,
+            duration,
+            files: shell.ls(previewFolder).map(x => path.join(previewFolder, x)),
+          });
+        });
       });
     });
-  });
 }
 
 function getDuration(file) {
