@@ -1,5 +1,10 @@
 import { app, BrowserWindow } from 'electron';
+import { createPreviews } from './utils/ffmpeg';
+import logger from './utils/logger';
+import shell from 'shelljs';
 
+const tmpDir = app.getPath('temp');
+const appDir = app.getPath('appData');
 let mainWindow = null;
 
 app.on('window-all-closed', () => {
@@ -13,12 +18,34 @@ app.on('ready', () => {
     show: false,
   });
   mainWindow.loadURL(`file://${__dirname}/renderer/index.html`);
+  createPreviews('/Users/ryanhirsch/Downloads/foo.mp4', appDir)
+    .then(({ videoFile, files }) => {
+      mainWindow.webContents.send('store_msg', {
+        type: 'PREVIEW_COMPLETE',
+        videoFile,
+        files,
+      });
+    })
+    .catch(e => logger('failed to create previews', e));
+
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
+    mainWindow.webContents.send('addHeaderMessage', {
+      hasFfmeg: ensure('ffmpeg'),
+      hasFfprobe: ensure('ffprobe'),
+    });
+    // convert(mainWindow.webContents, 'progress');
   });
 
   mainWindow.on('closed', () => {
     mainWindow = null;
+    shell.rm('-f', '~/Downloads/foobar.mp3');
   });
 });
+
+function ensure(bin = 'ffmpeg') {
+  if(!shell.which(bin)) {
+    return `This requires ${bin}`;
+  }
+}
