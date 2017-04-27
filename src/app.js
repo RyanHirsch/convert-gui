@@ -13,21 +13,11 @@ app.on('window-all-closed', () => {
 
 app.on('ready', () => {
   mainWindow = new BrowserWindow({
-    width: 580,
-    height: 365,
+    width: 1200,
+    height: 600,
     show: false,
   });
   mainWindow.loadURL(`file://${__dirname}/renderer/index.html`);
-  createPreviews('/Users/ryanhirsch/Downloads/foo.mp4', appDir)
-    .then(({ videoFile, files }) => {
-      mainWindow.webContents.send('store_msg', {
-        type: 'PREVIEW_COMPLETE',
-        videoFile,
-        files,
-      });
-    })
-    .catch(e => logger('failed to create previews', e));
-
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
