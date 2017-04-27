@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import ProgressBar from '../components/ProgressBar';
 import { ipcRenderer } from 'electron';
-
+import ProgressBar from '../components/ProgressBar';
+import DevTools from '../containers/DevTools';
 
 class App extends Component {
   constructor() {
