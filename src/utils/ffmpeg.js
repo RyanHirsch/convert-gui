@@ -10,6 +10,7 @@ function createPreviews(videoFile, outputPath, totalFrames = 20) {
       const previewFolder = path.join(outputPath, 'previews', hash);
       if(shell.test('-d', previewFolder)) {
         return {
+          hash,
           videoFile,
           previewFolder,
           duration,
@@ -24,6 +25,7 @@ function createPreviews(videoFile, outputPath, totalFrames = 20) {
             return reject({ videoFile, previewFolder, err });
           }
           return resolve({
+            hash,
             videoFile,
             previewFolder,
             duration,

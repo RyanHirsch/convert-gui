@@ -1,21 +1,28 @@
+import * as actions from './constants';
+
 const defaultState = {};
-
-const generatePreview = 'GENERATING_PREVIEW';
-
 export default function previewReducer(state = defaultState, action) {
   switch(action.type) {
-    case 'PREVIEW_COMPLETE': {
-      const { files, videoFile } = action;
+    case  actions.PREVIEW_COMPLETE: {
+      const { files, hash, duration } = action;
       return {
         ...state,
-        [videoFile]: files,
+        [hash]: {
+          ...state[hash],
+          processing: false,
+          files,
+          duration,
+        },
       };
     }
-    case 'GENERATING_PREVIEW': {
-      const { videoFile } = action;
+    case actions.GENERATE_PREVIEW: {
+      const { hash, name } = action;
       return {
         ...state,
-        [videoFile]: [],
+        [hash]: {
+          name: name,
+          processing: true,
+        },
       };
     }
     default: return state;
