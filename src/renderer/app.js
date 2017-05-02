@@ -8,7 +8,6 @@ import App from './containers/App';
 const store = initializeStore();
 
 ipcRenderer.on('dispatch', (event, arg) => {
-  console.log('dispatch', arg); // eslint-disable-line no-console
   store.dispatch(arg);
 });
 
