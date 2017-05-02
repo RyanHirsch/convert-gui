@@ -1,7 +1,7 @@
 {
   "name": "convert-gui",
   "version": "1.0.0",
-  "main": "src/app.js",
+  "main": "src/main",
   "author": "Ryan Hirsch <Ryan.Hirsch@gmail.com> (https://ryanhirsch.com/)",
   "license": "MIT",
   "scripts": {
