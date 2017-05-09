@@ -1,9 +1,15 @@
 import { createStore, applyMiddleware, compose } from 'redux';
+import { loadPreviews, savePreviews } from './renderer/api/localStorage';
 import appReducers from './reducers';
 import DevTools from './renderer/containers/DevTools';
 
-function initializeStore(initialState) {
+let store;
+export function initializeStore(initialState = {}) {
   const middleware = [];
+  const state = {
+    ...initialState,
+    previews: loadPreviews(),
+  };
   const enhancer = compose(
   // Middleware you want to use in development:
     applyMiddleware(...middleware),
@@ -11,13 +17,28 @@ function initializeStore(initialState) {
     DevTools.instrument(),
   );
 
-  return createStore(
+  store = createStore(
     appReducers,
-    initialState,
+    state,
     enhancer,
   );
+  return ensurePersistance(store);
 }
 
-export {
-  initializeStore,
-};
+function selectPreviews(state) {
+  return state.previews;
+}
+
+function ensurePersistance(store) {
+  let currentValue = loadPreviews();
+  function handleChange() {
+    const previousValue = currentValue;
+    currentValue = selectPreviews(store.getState());
+
+    if(previousValue !== currentValue) {
+      savePreviews(currentValue);
+    }
+  }
+  store.subscribe(handleChange);
+  return store;
+}

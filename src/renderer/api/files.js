@@ -1,9 +1,9 @@
 import { ipcRenderer } from 'electron';
 
-function openFileDialog(opts) {
+export function openFileDialog(opts) {
   ipcRenderer.send('open_file', opts);
 }
 
-export {
-  openFileDialog,
-};
+export function processFile(file) {
+  ipcRenderer.send('process_file', { file });
+}
