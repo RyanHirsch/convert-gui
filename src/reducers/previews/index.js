@@ -9,7 +9,7 @@ export default function previewReducer(state = defaultState, action) {
         ...state,
         [hash]: {
           ...state[hash],
-          processing: false,
+          processingEnd: Date.now(),
           files,
           duration,
         },
@@ -21,7 +21,7 @@ export default function previewReducer(state = defaultState, action) {
         ...state,
         [hash]: {
           name: name,
-          processing: true,
+          processingStart: Date.now(),
         },
       };
     }
