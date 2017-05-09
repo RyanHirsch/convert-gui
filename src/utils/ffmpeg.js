@@ -38,7 +38,7 @@ function createPreviews(videoFile, outputPath, totalFrames = 20) {
 
 function getDuration(file) {
   return new Promise((resolve, reject) => {
-    shell.exec(`ffprobe ${file}`, { silent: true }, (code, out, err) => {
+    shell.exec(`ffprobe "${file}"`, { silent: true }, (code, out, err) => {
       if(code !== 0) {
         return reject({ code, out, err });
       }
