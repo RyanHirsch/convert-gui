@@ -1,10 +1,8 @@
-import { app, BrowserWindow } from 'electron';
-import { createPreviews } from './utils/ffmpeg';
-import logger from './utils/logger';
 import shell from 'shelljs';
+import path from 'path';
+import { app, BrowserWindow } from 'electron';
+import { registerListeners } from './listeners';
 
-const tmpDir = app.getPath('temp');
-const appDir = app.getPath('appData');
 let mainWindow = null;
 
 app.on('window-all-closed', () => {
@@ -13,21 +11,13 @@ app.on('window-all-closed', () => {
 
 app.on('ready', () => {
   mainWindow = new BrowserWindow({
-    width: 580,
-    height: 365,
+    width: 1200,
+    height: 600,
     show: false,
   });
-  mainWindow.loadURL(`file://${__dirname}/renderer/index.html`);
-  createPreviews('/Users/ryanhirsch/Downloads/foo.mp4', appDir)
-    .then(({ videoFile, files }) => {
-      mainWindow.webContents.send('store_msg', {
-        type: 'PREVIEW_COMPLETE',
-        videoFile,
-        files,
-      });
-    })
-    .catch(e => logger('failed to create previews', e));
-
+  const renderer = path.resolve(__dirname, '..', 'renderer');
+  mainWindow.loadURL(`file://${renderer}/index.html`);
+  registerListeners(mainWindow);
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
@@ -35,6 +25,8 @@ app.on('ready', () => {
       hasFfmeg: ensure('ffmpeg'),
       hasFfprobe: ensure('ffprobe'),
     });
+
+    // process('/Users/ryanhirsch/Downloads/foo.mp4');
     // convert(mainWindow.webContents, 'progress');
   });
 

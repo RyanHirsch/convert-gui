@@ -1,54 +1,31 @@
 import React, { Component } from 'react';
-import ProgressBar from '../components/ProgressBar';
-import { ipcRenderer } from 'electron';
-
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import MenuBar from './MenuBar';
+import DevTools from './DevTools';
 
 class App extends Component {
-  constructor() {
-    super();
-    this.state = {
-      percentComplete: 0,
-    };
-  }
-  componentDidMount() {
-    ipcRenderer.on('progress', (event, arg) => {
-      const { percent } = arg;
-      this.setState({ percentComplete: percent });
-    });
-    ipcRenderer.on('store_msg', (event, arg) => {
-      previewReducer({}, arg);
-    });
-  }
   render() {
+    const { hashes } = this.props;
     return (
       <div>
-        <h1>Hello</h1>
-        <ProgressBar percent={ this.state.percentComplete } />
+        <MenuBar />
+        <ul>
+          { hashes.map(h => <li key={ h }>{ h }</li>) }
+        </ul>
+        <DevTools />
       </div>
     );
   }
 }
+App.propTypes = {
+  hashes: PropTypes.arrayOf(PropTypes.string),
+};
 
-export default App;
+export default connect(mapStateToProps)(App);
 
-
-const defaultState = {};
-function previewReducer(state = defaultState, action) {
-  switch(action.type) {
-    case 'PREVIEW_COMPLETE': {
-      const { files, videoFile } = action;
-      return {
-        ...state,
-        [videoFile]: files,
-      };
-    }
-    case 'GENERATING_PREVIEW': {
-      const { videoFile } = action;
-      return {
-        ...state,
-        [videoFile]: [],
-      };
-    }
-    default: return state;
-  }
+function mapStateToProps(state) {
+  return {
+    hashes: Object.keys(state.previews),
+  };
 }

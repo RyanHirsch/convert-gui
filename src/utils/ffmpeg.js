@@ -3,13 +3,17 @@ import path from 'path';
 import { spawn } from 'child_process';
 import { getMilliseconds, getTime } from './progress';
 import { hashFile } from './file';
+import logger from './logger';
 
 function createPreviews(videoFile, outputPath, totalFrames = 20) {
+  logger.log('silly', `createPreviews for ${videoFile} and saving to ${outputPath}`);
   return Promise.all([ getDuration(videoFile), hashFile(videoFile) ])
     .then(([ duration, hash ]) => {
       const previewFolder = path.join(outputPath, 'previews', hash);
       if(shell.test('-d', previewFolder)) {
+        logger.log('silly', `preview folder ${previewFolder} already exists`);
         return {
+          hash,
           videoFile,
           previewFolder,
           duration,
@@ -21,9 +25,12 @@ function createPreviews(videoFile, outputPath, totalFrames = 20) {
         const fps = Math.floor(duration / 1000 / totalFrames);
         shell.exec(`ffmpeg -i "${videoFile}" -vf fps=1/${fps} "${previewFolder}/frame-%03d.jpg"`, { silent: true }, (code, out, err) => {
           if(code !== 0) {
+            logger.log('silly', `Preview frames failed to create for ${videoFile}`);
             return reject({ videoFile, previewFolder, err });
           }
+          logger.log('silly', `Preview frames extracted successfully for ${videoFile}`);
           return resolve({
+            hash,
             videoFile,
             previewFolder,
             duration,
@@ -35,11 +42,16 @@ function createPreviews(videoFile, outputPath, totalFrames = 20) {
 }
 
 function getDuration(file) {
+  const start = Date.now();
+  logger.log('silly', `getDuration for ${file}`);
   return new Promise((resolve, reject) => {
-    shell.exec(`ffprobe ${file}`, { silent: true }, (code, out, err) => {
+    shell.exec(`ffprobe "${file}"`, { silent: true }, (code, out, err) => {
+      const elapsed = Date.now() - start;
       if(code !== 0) {
+        logger.log('silly', `getDuration for ${file} failed after ${elapsed}ms`);
         return reject({ code, out, err });
       }
+      logger.log('silly', `getDuration for ${file} was successful after ${elapsed}ms`);
       const [, length ] = (/Duration: (\S+),\s/.exec(err));
       return resolve(getMilliseconds(length));
     });
