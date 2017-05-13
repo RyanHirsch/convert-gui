@@ -16,3 +16,10 @@ export function previewComplete(hash, files, duration) {
     duration,
   };
 }
+
+export function removePreview(hash) {
+  return {
+    type: actions.REMOVE_PREVIEW,
+    hash,
+  };
+}

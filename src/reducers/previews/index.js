@@ -15,6 +15,12 @@ export default function previewReducer(state = defaultState, action) {
         },
       };
     }
+    case actions.REMOVE_PREVIEW: {
+      const { hash } = action;
+      const cp = { ...state };
+      delete cp[hash];
+      return cp;
+    }
     case actions.GENERATE_PREVIEW: {
       const { hash, name } = action;
       return {
